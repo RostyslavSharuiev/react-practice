@@ -23,19 +23,30 @@ const products = productsFromServer.map(product => {
   };
 });
 
-console.log(products);
-
 export const App = () => {
   const [activeUser, setActiveUser] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
 
   const handleChangeUser = id => {
     setActiveUser(id);
   };
 
-  const filterProducts =
-    activeUser === 0
-      ? products
-      : products.filter(product => product.user.id === activeUser);
+  const filterProducts = products.filter(product => {
+    const matchesUser = activeUser === 0 || product.user.id === activeUser;
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchValue.toLowerCase());
+
+    return matchesUser && matchesSearch;
+  });
+
+  const handleInputChange = event => {
+    setSearchValue(event.target.value);
+  };
+
+  const handleClearInput = () => {
+    setSearchValue('');
+  };
 
   return (
     <div className="section">
@@ -80,7 +91,8 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchValue}
+                  onChange={handleInputChange}
                 />
 
                 <span className="icon is-left">
@@ -89,11 +101,14 @@ export const App = () => {
 
                 <span className="icon is-right">
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
+                  {searchValue && (
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={handleClearInput}
+                    />
+                  )}
                 </span>
               </p>
             </div>
@@ -202,7 +217,7 @@ export const App = () => {
 
             <tbody>
               {filterProducts.map(product => (
-                <tr data-cy="Product">
+                <tr key={product.id} data-cy="Product">
                   <td className="has-text-weight-bold" data-cy="ProductId">
                     {product.id}
                   </td>
